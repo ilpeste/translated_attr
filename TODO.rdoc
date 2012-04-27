@@ -1,0 +1,13 @@
+== General
+
+* formtastic support
+* automatic detection of simple_form/formtastic and creation of the translation field partial with the right helper name
+* helpers for fields_for attribute
+* configurable fallback chain via :fallback => :default or :fallback => true
+* include options for default_scope via config :include => true
+* inclusion of locale.yml for validations errors
+
+
+== Documentation
+
+* documentation for generator rollbacks

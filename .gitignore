@@ -5,5 +5,5 @@ pkg
 .idea
 .rvmrc
 lib/generators
-lib/test
+test
 .rvmrc

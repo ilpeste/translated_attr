@@ -34,7 +34,7 @@ begin
     s.homepage = "http://github.com/mcanato/translated_attr"
     s.description = "A minimal translation library for translating database values for Rails 3.x"
     s.authors = ['Matteo Canato']
-    s.version = "1.0.0"
+    s.version = "1.0.1"
     #s.files =  FileList["[A-Z]*(.rdoc)", "{generators,lib}/**/*", "init.rb"]
   end
 

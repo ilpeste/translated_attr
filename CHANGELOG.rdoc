@@ -1,3 +1,7 @@
+== 1.0.1
+
+* Removed unused gems in Gemfile
+
 == 1.0
 
 * First release

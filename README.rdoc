@@ -1,0 +1,152 @@
+== TranslatedAttr
+
+TranslatedAttr is a minimal pure translation library for translating database values for Rails 3.x.
+
+TranslatedAttr is quiet like puret http://github.com/jo/puret (and borrowed much of its code).
+
+TranslatedAttr add some methods for dealing with nested form attributes
+
+* ability to edit all translations ad one time with nested forms
+* ability to find a record through a translated attribute (eg: Post.find_by_title)
+* need some convenience methods for setting and getting specific locale attribute (eg: post.title_en = 'Hello')
+
+== Installation
+
+You need configure the translated_attr gem inside your gemfile:
+
+  gem 'translated_attr'
+
+And then:
+
+  bundle install
+
+
+== Basic Usage
+
+This is a walkthrough with all steps you need to setup puret translated attributes, including model and migration. You MUST also check out the *Generators* section below to help you start.
+
+We're assuming here you want a Post model with some puret attributes, as outlined below:
+
+  class Post < ActiveRecord::Base
+    translated_attr :title, :description
+  end
+
+
+The pure translations are stored in a different translation model for every model you need translations for:
+
+  class PostTranslation < ActiveRecord::Base
+    translations_for :post
+  end
+
+Create an initializer for setting the default locale and the available locale in your config/application.rb:
+
+  # config/initializers/locale.rb
+  I18n.available_locales = [:it, :en, :es]
+  # set default locale to something other than :en
+  I18n.default_locale = :it
+
+Add the defa
+
+
+You now need to create a migration for the translations table:
+
+  create_table(:post_translations) do |t|
+    t.references :post
+    t.string :locale
+
+    t.string :title
+    t.text :description
+
+    t.timestamps
+  end
+  add_index :post_translations, [:post_id, :locale],
+    :unique => true,
+    :name => 'index_on_post_translations' # Override default name because it could be too long for some DBMS as mySql
+
+
+Now you are able to translate values for the attributes :title and :description per locale:
+
+  I18n.locale = :en
+  post.title = 'Hello!'
+  I18n.locale = :it
+  post.title = 'Ciao!'
+
+  I18n.locale = :en
+  post.title #=> Hello!
+  I18n.locale = :it
+  post.title #=> Ciao!
+
+This fork let you do also:
+
+  post.title_en = 'Hello!'
+  post.title_it = 'Ciao!'
+
+  post.title_en #=> Hello!
+  post.title_it #=> Ciao!
+
+And with dynamic finders:
+
+  I18n.locale = :en
+  Post.find_by_title('Hello!')
+  I18n.locale = :it
+  Post.find_by_title('Ciao!')
+
+
+
+== Translation lookup fallback
+
+If a translation is not available in your locale, puret looks 
+
+1. for an instance method called *default_locale* and the corresponding translation
+2. for a class method called *default_locale* and the corresponding translation
+3. for a translation in I18n.default_locale
+
+In case a translation is not available in the default locale, puret uses the first locale it could find.
+That order is specified by creation time, so the first created translation will be returned.
+
+
+== Nested forms attributes
+
+For dealing with nested form attributes you should use a partial like this (here we use simple_form gem):
+
+    <%= simple_form_for(@post) do |f| %>
+        <%= f.simple_fields_for :translations do |g| %>
+          <%= g.input :locale, :as => :hidden %>
+          <% g.object.class.attribute_names_for_translation.each do |attr| %>
+              <%= g.input attr,
+                          :label => t("activerecord.attributes.#{f.object.class.name.underscore}.#{attr}_translation",
+                                      :lang => g.object.locale) %>
+          <% end %>
+        <% end %>
+
+        <%= f.button :submit %>
+    <% end %>
+
+
+== Validators localization
+
+For the validators you can create in config/locales/translated_attr folder the localization files:
+
+    # config/locales/translated_attr/it.yml
+    it:
+      translated_attr:
+        errors:
+          translations_presence: "manca la traduzione di %{attr} in :%{lang}"
+          translations_uniq: "traduzione duplicata con lo stesso locale"
+
+    # config/locales/translated_attr/en.yml
+    en:
+      translated_attr:
+        errors:
+          translations_presence: "missing :%{lang} translation of %{attr}"
+          translations_uniq: "duplicated translation with the same locale"
+
+== Bugs and Feedback
+
+If you discover any bugs or want to drop a line, feel free to create an issue on
+GitHub:
+
+http://github.com/mcanato/translated_attr/issues
+
+
+Copyright (c) 2012 Matteo Canato, released under the MIT license

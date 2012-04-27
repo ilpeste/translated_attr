@@ -1,0 +1,9 @@
+coverage
+rdoc
+pkg
+*.sw?
+.idea
+.rvmrc
+lib/generators
+lib/test
+.rvmrc
